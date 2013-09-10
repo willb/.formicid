@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+def dotify(filename, ostr=sys.stdout):
+    root = ET.parse(filename).getroot()
+    ostr.print "digraph antbuild {"
+    for target in root.getchildren():
+        attribs = target.attrib
+        if attribs.has_key('name'):
+            label = attribs['name']
+            name = re.sub("[^\\w]", "_", label)
+            ostr.print 'node [label = "%s"]; %s;' % (label, name)
+            if attribs.has_key('depends'):
+                for dep in attribs['depends'].split(','):
+                    ostr.print "%s -> %s;" % (name, re.sub("[^\\w]", "_", dep))
+    ostr.print "}"
+
+if __name__ == '__main__':
+    dotify(sys.argv[1])
